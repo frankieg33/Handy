@@ -2,6 +2,18 @@
 
 This file provides guidance to AI coding assistants working with code in this repository.
 
+## Downstream Branch Policy
+
+This repository is a downstream build of `cjpais/Handy`.
+
+- `release` is the canonical product branch for all development, builds, tests, and PRs.
+- `main` is a pristine mirror of upstream Handy tracking `origin/main`.
+- Feature branches start from `release` and merge into `release` via squash merge.
+- Never commit downstream changes directly to `main` or merge `release` into `main`.
+- Upstream syncs fast-forward `main` to `upstream/main` and merge `main` into `release` via merge commit.
+
+See [`docs/DOWNSTREAM.md`](docs/DOWNSTREAM.md) for full downstream lifecycle and contribution workflows.
+
 ## Development Commands
 
 **Prerequisites:**

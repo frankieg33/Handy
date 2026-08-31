@@ -1190,12 +1190,14 @@ fn apply_settings_migrations(
 }
 
 /// Update checks are forced off (without touching the persisted setting) when
-/// `HANDY_DISABLE_UPDATER` is set — e.g. by the Nix package, since self-update
-/// can't work against an immutable /nix/store install.
+/// downstream disables them or `HANDY_DISABLE_UPDATER` is set — e.g. by the Nix package,
+/// since self-update can't work against an immutable /nix/store install.
 pub fn update_checks_forced_disabled() -> bool {
     use std::sync::OnceLock;
     static IS_UPDATER_DISABLED: OnceLock<bool> = OnceLock::new();
-    *IS_UPDATER_DISABLED.get_or_init(|| utils::env_flag_enabled("HANDY_DISABLE_UPDATER"))
+    *IS_UPDATER_DISABLED.get_or_init(|| {
+        crate::downstream::is_updater_disabled() || utils::env_flag_enabled("HANDY_DISABLE_UPDATER")
+    })
 }
 
 /// Effective updater state: the user's stored preference, overridden to `false`
@@ -1712,5 +1714,12 @@ mod tests {
         let out = format!("{:?}", map);
         assert!(!out.contains("secret"));
         assert!(out.contains("[REDACTED]"));
+    }
+
+    #[test]
+    fn downstream_updater_is_forced_disabled() {
+        assert!(update_checks_forced_disabled());
+        let default_settings = get_default_settings();
+        assert!(!update_checks_effectively_enabled(&default_settings));
     }
 }
